@@ -174,7 +174,11 @@ function _publishToLocalRegistry {
     loadCache .cache $HOME/.cache
 
     source ./.circleci/local_publish_helpers.sh && startLocalRegistry "$CODEBUILD_SRC_DIR/.circleci/verdaccio.yaml"
+<<<<<<< HEAD
     setNpmRegistryUrlToLocal
+=======
+    source ./.circleci/local_publish_helpers.sh && setNpmRegistryUrlToLocal
+>>>>>>> fc6d2b1e16 (ci: updates to fix build/package & produce binaries (#12284))
     export LOCAL_PUBLISH_TO_LATEST=true
     ./.circleci/publish-codebuild.sh
     unsetNpmRegistryUrl
@@ -262,6 +266,7 @@ function _runE2ETestsLinux {
     loadCache .cache $HOME/.cache
     loadCache verdaccio-cache $CODEBUILD_SRC_DIR/../verdaccio-cache
 
+<<<<<<< HEAD
     loadCache all-binaries $CODEBUILD_SRC_DIR/out
     loadCacheFile .amplify-pkg-version $CODEBUILD_SRC_DIR/.amplify-pkg-version
     loadCacheFile UNIFIED_CHANGELOG.md $CODEBUILD_SRC_DIR/UNIFIED_CHANGELOG.md
@@ -271,6 +276,12 @@ function _runE2ETestsLinux {
     # verify installation
     amplify version
 
+=======
+    loadCache repo-out $CODEBUILD_SRC_DIR/out
+    loadCacheFile .amplify-pkg-version $CODEBUILD_SRC_DIR/.amplify-pkg-version
+    loadCacheFile UNIFIED_CHANGELOG.md $CODEBUILD_SRC_DIR/UNIFIED_CHANGELOG.md
+
+>>>>>>> fc6d2b1e16 (ci: updates to fix build/package & produce binaries (#12284))
     source .circleci/local_publish_helpers.sh && startLocalRegistry "$CODEBUILD_SRC_DIR/.circleci/verdaccio.yaml"
     # source $BASH_ENV
 
