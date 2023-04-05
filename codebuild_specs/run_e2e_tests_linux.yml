@@ -3,6 +3,7 @@ env:
   shell: bash
   variables:
     CLI_REGION: us-east-1
+<<<<<<< HEAD
     TEST_SUITE: src/__tests__/auth_2a.test.ts|src/__tests__/auth_2b.test.ts|src/__tests__/auth_2d.test.ts|src/__tests__/auth_2f.test.ts
     CI: true
     CIRCLECI: true
@@ -22,6 +23,11 @@ env:
     APPLE_KEY_ID: '2QLZXKYJ8J'
     # mock value, Cognito validates the private key, this is an invalidated key.
     APPLE_PRIVATE_KEY: '----BEGIN PRIVATE KEY-----MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgIltgNsTgTfSzUadYiCS0VYtDDMFln/J8i1yJsSIw5g+gCgYIKoZIzj0DAQehRANCAASI8E0L/DhR/mIfTT07v3VwQu6q8I76lgn7kFhT0HvWoLuHKGQFcFkXXCgztgBrprzd419mUChAnKE6y89bWcNw----END PRIVATE KEY----'
+=======
+    TEST_SUITE: src/__tests__/auth_2b.test.ts
+    CI: true
+    CIRCLECI: true
+>>>>>>> 5c700107f0 (ci: e2e test setup for assume role in test account org (#12392))
 phases:
   build:
     commands:
@@ -37,8 +43,11 @@ phases:
   post_build:
     commands:
       - aws sts get-caller-identity
+<<<<<<< HEAD
       - source ./shared-scripts.sh && _scanArtifacts
 
 artifacts:
   files:
     - $CODEBUILD_SRC_DIR/packages/amplify-e2e-tests/amplify-e2e-reports/*
+=======
+>>>>>>> 5c700107f0 (ci: e2e test setup for assume role in test account org (#12392))

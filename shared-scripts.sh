@@ -278,8 +278,11 @@ function _runE2ETestsLinux {
     changeNpmGlobalPath
     amplify version
     
-    # cd packages/amplify-e2e-tests
-    # retry runE2eTest
+    cd packages/amplify-e2e-tests
+
+    _loadTestAccountCredentials
+
+    retry runE2eTest
 }
 function _runE2ETestsWin {
     echo RUN E2E Tests Windows
