@@ -98,7 +98,6 @@ batch:
       env:
         compute-type: BUILD_GENERAL1_LARGE
       debug-session: true
-<<<<<<< HEAD
       depend-on:
         - upload_pkg_binaries
     - identifier: run_e2e_tests_windows
@@ -107,7 +106,5 @@ batch:
         type: WINDOWS_SERVER_2019_CONTAINER
         compute-type: BUILD_GENERAL1_LARGE
         image: aws/codebuild/windows-base:2019-2.0
-=======
->>>>>>> 5c700107f0 (ci: e2e test setup for assume role in test account org (#12392))
       depend-on:
         - upload_pkg_binaries
