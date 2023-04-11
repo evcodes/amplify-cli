@@ -284,6 +284,33 @@ function _runE2ETestsLinux {
 
     retry runE2eTest
 }
+function _runE2ETestsWin {
+    echo RUN E2E Tests Windows
+
+    echo Git Enable Long Paths
+    git config --global core.longpaths true
+
+    loadCache repo-windows $CODEBUILD_SRC_DIR
+    loadCache .cache-windows $HOME/.cache
+    loadCache verdaccio-cache $CODEBUILD_SRC_DIR/../verdaccio-cache
+
+    loadCache all-binaries $CODEBUILD_SRC_DIR/out
+    loadCacheFile .amplify-pkg-version $CODEBUILD_SRC_DIR/.amplify-pkg-version
+    loadCacheFile UNIFIED_CHANGELOG.md $CODEBUILD_SRC_DIR/UNIFIED_CHANGELOG.md
+
+    source .circleci/local_publish_helpers.sh && startLocalRegistry "$CODEBUILD_SRC_DIR/.circleci/verdaccio.yaml"
+    source $BASH_ENV
+
+    setNpmRegistryUrlToLocal
+    changeNpmGlobalPath
+    amplify version
+    
+    cd packages/amplify-e2e-tests
+
+    _loadTestAccountCredentials
+
+    retry runE2eTest
+}
 function _runE2ETestsWindows {
     echo RUN E2E Tests Windows
 
@@ -321,13 +348,4 @@ function _runE2ETestsWindows {
     _loadTestAccountCredentials
 
     retry runE2eTest
-}
-
-
-function _scanArtifacts {
-    if ! yarn ts-node .circleci/scan_artifacts_codebuild.ts; then
-        echo "Cleaning the repository"
-        git clean -fdx
-        exit 1
-    fi
 }

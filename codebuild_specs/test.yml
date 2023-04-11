@@ -2,8 +2,9 @@ version: 0.2
 env:
   shell: bash
   variables:
-    NODE_OPTIONS: --max-old-space-size=4096
+    NODE_OPTIONS: --max-old-space-size=14000
 phases:
   build:
     commands:
+      - codebuild-breakpoint
       - source ./shared-scripts.sh && _testLinux
