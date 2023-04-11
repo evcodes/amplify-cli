@@ -3,7 +3,6 @@ env:
   shell: bash
   variables:
     NODE_OPTIONS: --max-old-space-size=12000
-  debug-session: true
 phases:
   build:
     commands:
