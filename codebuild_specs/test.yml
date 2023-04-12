@@ -7,4 +7,5 @@ phases:
   build:
     commands:
       - codebuild-breakpoint
+      - node -e "console.log(require('v8').getHeapStatistics().total_available_size / 1024 / 1024)"
       - source ./shared-scripts.sh && _testLinux
