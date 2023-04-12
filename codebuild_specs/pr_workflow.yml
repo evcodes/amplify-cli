@@ -51,7 +51,13 @@ batch:
         compute-type: BUILD_GENERAL1_LARGE
       depend-on:
         - build_linux
-    - identifier: cleanup-resources
+    - identifier: integration_tests
+      buildspec: codebuild_specs/integration_test.yml
+      env:
+        compute-type: BUILD_GENERAL1_LARGE
+      depend-on:
+        - build_linux
+    - identifier: cleanup_resources
       buildspec: codebuild_specs/cleanup_resources.yml
       env:
         compute-type: BUILD_GENERAL1_LARGE

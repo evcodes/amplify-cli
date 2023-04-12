@@ -350,8 +350,12 @@ function _runE2ETestsWindows {
     retry runE2eTest
 }
 
-function _integrationTests{
+function _integrationTests {
+    #restore cache
+    loadCache repo $CODEBUILD_SRC_DIR
+    loadCache .cache $HOME/.cache
 
+    echo integration testing not implemented yet...
 }
 
 function _cleanupResources {
