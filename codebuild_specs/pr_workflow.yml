@@ -22,6 +22,7 @@ batch:
       buildspec: codebuild_specs/test.yml
       env:
         compute-type: BUILD_GENERAL1_2XLARGE
+      debug-session: true
       depend-on:
         - build_linux
     - identifier: mock_e2e_tests
