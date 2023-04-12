@@ -82,9 +82,6 @@ function _loadTestAccountCredentials {
     export AWS_SESSION_TOKEN=$(echo $creds | jq -c -r ".Credentials.SessionToken")
 }
 
-
-
-
 function _setShell {
     echo Setting Shell
     yarn config set script-shell $(which bash)
@@ -354,6 +351,9 @@ function _integrationTests {
     #restore cache
     loadCache repo $CODEBUILD_SRC_DIR
     loadCache .cache $HOME/.cache
+
+    # make file executable
+    cd .circleci/ && chmod +x aws.sh
 
     echo integration testing not implemented yet...
 }

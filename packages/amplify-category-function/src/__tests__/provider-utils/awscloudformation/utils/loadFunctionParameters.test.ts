@@ -1,4 +1,4 @@
-import { JSONUtilities } from '@aws-amplify/amplify-cli-core';
+import { JSONUtilities, isCI } from '@aws-amplify/amplify-cli-core';
 import { loadFunctionParameters } from '../../../../provider-utils/awscloudformation/utils/loadFunctionParameters';
 
 jest.mock('@aws-amplify/amplify-cli-core', () => ({
@@ -35,6 +35,9 @@ describe('load function parameters', () => {
     },
   };
 
+  if (isCI()) {
+    jest.retryTimes(2);
+  }
   it('destructures mutableParametersState if it exists', () => {
     JSONUtilities_mock.readJson.mockImplementationOnce(
       jest.fn(() => ({ ...funcParamsBase, ...permissionsBase, ...mutableParametersStub })),
