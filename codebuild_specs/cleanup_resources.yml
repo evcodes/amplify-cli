@@ -4,4 +4,4 @@ env:
 phases:
   build:
     commands:
-      - echo cleanup running
+      - source ./shared-scripts.sh && _cleanupResources

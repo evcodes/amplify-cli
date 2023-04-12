@@ -349,3 +349,18 @@ function _runE2ETestsWindows {
 
     retry runE2eTest
 }
+
+function _integrationTests{
+
+}
+
+function _cleanupResources {
+    #restore cache
+    loadCache repo $CODEBUILD_SRC_DIR
+    loadCache .cache $HOME/.cache
+
+    cd packages/amplify-e2e-tests
+    yarn clean-e2e-resources
+
+    storeCache $CODEBUILD_SRC_DIR/packages/amplify-e2e-tests/amplify-e2e-reports repo
+}

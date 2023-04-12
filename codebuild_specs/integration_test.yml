@@ -4,4 +4,4 @@ env:
 phases:
   build:
     commands:
-      - echo integration testing
+      - source ./shared-scripts.sh && _integrationTests
