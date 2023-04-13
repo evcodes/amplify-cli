@@ -124,18 +124,9 @@ function _testLinux {
         echo "failed: ${@}" >&2
         exit 1
     fi
-
-
-
-
-
-
-
-   
-  
-    # run tests
-    # echo collecting coverage
-    # yarn coverage
+    
+    echo collecting coverage
+    yarn coverage
 }
 function _validateCDKVersion {
     echo Validate CDK Version
