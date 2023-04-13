@@ -104,11 +104,36 @@ function _buildWindows {
 }
 function _testLinux {
     echo Run Test
-    # download [repo, .cache from s3]
+    MAX_ATTEMPTS=2
+    SLEEP_DURATION=5
+    FIRST_RUN=true
+    n=0
+
+      # download [repo, .cache from s3]
     loadCache repo $CODEBUILD_SRC_DIR
     loadCache .cache $HOME/.cache
+
+    until [ $n -ge $MAX_ATTEMPTS ]
+    do
+        echo "Attempting $@ with max retries $MAX_ATTEMPTS"
+        yarn test-ci
+        echo "Attempt $n completed."
+        sleep $SLEEP_DURATION
+    done
+    if [ $n -ge $MAX_ATTEMPTS ]; then
+        echo "failed: ${@}" >&2
+        exit 1
+    fi
+
+
+
+
+
+
+
+   
+  
     # run tests
-    yarn test-ci
     # echo collecting coverage
     # yarn coverage
 }
