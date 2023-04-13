@@ -102,30 +102,26 @@ function _buildWindows {
     storeCache $CODEBUILD_SRC_DIR repo-windows
     storeCache $HOME/.cache .cache-windows
 }
+
+function _unitTests {
+    FAILED_TEST_REGEX_FILE=./amplify-unit-tests/failed_unit_tests.txt
+    if [ -f  $FAILED_TEST_REGEX_FILE ]; then
+        # read the content of failed tests
+        failedTests=$(<$FAILED_TEST_REGEX_FILE)
+        yarn test-ci --forceExit --no-cache --maxWorkers=4 $TEST_SUITE -t "$failedTests"
+    else
+        yarn test-ci --forceExit --no-cache --maxWorkers=4 $TEST_SUITE
+    fi
+}
+
 function _testLinux {
     echo Run Test
-    MAX_ATTEMPTS=2
-    SLEEP_DURATION=5
-    FIRST_RUN=true
-    n=0
 
-      # download [repo, .cache from s3]
+    # download [repo, .cache from s3]
     loadCache repo $CODEBUILD_SRC_DIR
     loadCache .cache $HOME/.cache
 
-    until [ $n -ge $MAX_ATTEMPTS ]
-    do
-        echo "Attempting $@ with max retries $MAX_ATTEMPTS"
-        "$@" && break
-        n=$[$n+1]
-        yarn test-ci
-        echo "Attempt $n completed."
-        sleep $SLEEP_DURATION
-    done
-    if [ $n -ge $MAX_ATTEMPTS ]; then
-        echo "failed: ${@}" >&2
-        exit 1
-    fi
+    retry _unitTests
     
     # echo collecting coverage
     # yarn coverage
@@ -180,6 +176,8 @@ function _mockE2ETests {
 
     source .circleci/local_publish_helpers.sh
     cd packages/amplify-util-mock/
+
+    
     yarn e2e
 }
 function _publishToLocalRegistry {
@@ -380,6 +378,9 @@ function _cleanupResources {
     #restore cache
     loadCache repo $CODEBUILD_SRC_DIR
     loadCache .cache $HOME/.cache
+    
+    #loading test account credentials
+    _loadTestAccountCredentials
 
     cd packages/amplify-e2e-tests
     yarn clean-e2e-resources
