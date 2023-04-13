@@ -2,10 +2,13 @@ version: 0.2
 env:
   shell: bash
   variables:
-    NODE_OPTIONS: --max-old-space-size=12000
+    NODE_OPTIONS: --max-old-space-size=13000
 phases:
   build:
     commands:
       - codebuild-breakpoint
       - node -e "console.log(require('v8').getHeapStatistics().total_available_size / 1024 / 1024)"
       - source ./shared-scripts.sh && _testLinux
+  post_build:
+    commands: 
+      - echo Finished unit testing

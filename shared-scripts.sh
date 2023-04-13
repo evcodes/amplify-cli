@@ -116,6 +116,8 @@ function _testLinux {
     until [ $n -ge $MAX_ATTEMPTS ]
     do
         echo "Attempting $@ with max retries $MAX_ATTEMPTS"
+        "$@" && break
+        n=$[$n+1]
         yarn test-ci
         echo "Attempt $n completed."
         sleep $SLEEP_DURATION
