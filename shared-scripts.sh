@@ -127,8 +127,8 @@ function _testLinux {
         exit 1
     fi
     
-    echo collecting coverage
-    yarn coverage
+    # echo collecting coverage
+    # yarn coverage
 }
 function _validateCDKVersion {
     echo Validate CDK Version
