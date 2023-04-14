@@ -122,8 +122,7 @@ function _testLinux {
     loadCache .cache $HOME/.cache
 
     yarn test-ci
-    yarn test-ci
-    
+        
     # echo collecting coverage
     # yarn coverage
 }
@@ -174,6 +173,8 @@ function _mockE2ETests {
     # download [repo, .cache from s3]
     loadCache repo $CODEBUILD_SRC_DIR
     loadCache .cache $HOME/.cache
+
+    sudo apt-get -y install lsof
 
     source .circleci/local_publish_helpers.sh
     cd packages/amplify-util-mock/
