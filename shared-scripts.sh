@@ -72,7 +72,7 @@ function _loadTestAccountCredentials {
     echo ASSUMING PARENT TEST ACCOUNT credentials
     echo $TEST_ACCOUNT_ROLE
     echo $RANDOM
-    
+
     session_id=$((1 + $RANDOM % 10000))
     creds=$(aws sts assume-role --role-arn $TEST_ACCOUNT_ROLE --role-session-name testSession${session_id} --duration-seconds 3600)
     if [ -z $(echo $creds | jq -c -r '.AssumedRoleUser.Arn') ]; then
@@ -117,13 +117,12 @@ function _unitTests {
 function _testLinux {
     echo Run Test
 
-    source .circleci/local_publish_helpers.sh
-
     # download [repo, .cache from s3]
     loadCache repo $CODEBUILD_SRC_DIR
     loadCache .cache $HOME/.cache
 
-    retry _unitTests
+    yarn test-ci
+    yarn test-ci
     
     # echo collecting coverage
     # yarn coverage
