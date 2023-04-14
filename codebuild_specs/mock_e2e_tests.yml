@@ -7,4 +7,5 @@ env:
 phases:
   build:
     commands:
+      - codebuild-breakpoint
       - source ./shared-scripts.sh && _mockE2ETests
