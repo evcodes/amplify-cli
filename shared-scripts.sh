@@ -70,6 +70,9 @@ function loadCacheFile {
 }
 function _loadTestAccountCredentials {
     echo ASSUMING PARENT TEST ACCOUNT credentials
+    echo $TEST_ACCOUNT_ROLE
+    echo $RANDOM
+    
     session_id=$((1 + $RANDOM % 10000))
     creds=$(aws sts assume-role --role-arn $TEST_ACCOUNT_ROLE --role-session-name testSession${session_id} --duration-seconds 3600)
     if [ -z $(echo $creds | jq -c -r '.AssumedRoleUser.Arn') ]; then
@@ -81,7 +84,6 @@ function _loadTestAccountCredentials {
     export AWS_SECRET_ACCESS_KEY=$(echo $creds | jq -c -r ".Credentials.SecretAccessKey")
     export AWS_SESSION_TOKEN=$(echo $creds | jq -c -r ".Credentials.SessionToken")
 }
-
 function _setShell {
     echo Setting Shell
     yarn config set script-shell $(which bash)
@@ -102,7 +104,6 @@ function _buildWindows {
     storeCache $CODEBUILD_SRC_DIR repo-windows
     storeCache $HOME/.cache .cache-windows
 }
-
 function _unitTests {
     FAILED_TEST_REGEX_FILE=./amplify-unit-tests/failed_unit_tests.txt
     if [ -f  $FAILED_TEST_REGEX_FILE ]; then
@@ -113,9 +114,10 @@ function _unitTests {
         yarn test-ci --forceExit --no-cache --maxWorkers=4 $TEST_SUITE
     fi
 }
-
 function _testLinux {
     echo Run Test
+
+    source .circleci/local_publish_helpers.sh
 
     # download [repo, .cache from s3]
     loadCache repo $CODEBUILD_SRC_DIR
@@ -177,7 +179,6 @@ function _mockE2ETests {
     source .circleci/local_publish_helpers.sh
     cd packages/amplify-util-mock/
 
-    
     yarn e2e
 }
 function _publishToLocalRegistry {
@@ -362,7 +363,6 @@ function _runE2ETestsWindows {
 
     retry runE2eTest
 }
-
 function _integrationTests {
     #restore cache
     loadCache repo $CODEBUILD_SRC_DIR
@@ -371,9 +371,95 @@ function _integrationTests {
     # make file executable
     cd .circleci/ && chmod +x aws.sh
 
+    #setting up dependencies
+    apt-get update
+    apt-get install -y sudo
+    sudo apt-get install -y tcl
+    sudo apt-get install -y expect
+    sudo apt-get install -y zip
+    sudo apt-get install -y lsof
+    sudo apt-get install -y python python-pip libpython-dev
+    sudo apt-get install -y jq
+    pip install awscli
+
+    # don't know what this does
+    expect .circleci/aws_configure.exp
+
+    # configuring Amplify CLI
+    yarn rm-dev-link && yarn link-dev && yarn rm-aa-dev-link && yarn link-aa-dev
+    echo 'export PATH="$(yarn global bin):$PATH"' >> $BASH_ENV
+    amplify-dev
+
+    # cloning auth test package
+    cd ..
+    git clone $AUTH_CLONE_URL
+    cd aws-amplify-cypress-auth
+    yarn --cache-folder ~/.cache/yarn
+    yarn add cypress@6.8.0 --save
+
+    cd .circleci/ && chmod +x auth.sh && chmod +x amplify_init.sh && chmod +x amplify_init.exp
+    expect .circleci/amplify_init.exp ../aws-amplify-cypress-auth
+    expect .circleci/enable_auth.exp
+    cd ../aws-amplify-cypress-auth
+    yarn --frozen-lockfile --cache-folder ~/.cache/yarn
+    cd ../aws-amplify-cypress-auth/src && cat $(find . -type f -name 'aws-exports*')
+
+    # Start auth test server in the background
+    cd ../aws-amplify-cypress-auth
+    pwd
+    yarn start
+
+    # Run cypress test for auth
+    cd ../aws-amplify-cypress-auth
+    cp ../repo/cypress.json .
+    cp -R ../repo/cypress .
+    yarn cypress run --spec $(find . -type f -name 'auth_spec*')
+
+    # cleanup scripts
+    sudo kill -9 $(lsof -t -i:3000)
+    cd .circleci/ && chmod +x delete_auth.sh
+    expect .circleci/delete_auth.exp
+
+    # clone API Test Package
+    cd ..
+    git clone $API_CLONE_URL #TODO: Define this
+    cd aws-amplify-cypress-api
+    yarn --cache-folder ~/.cache/yarn
+
+    cd .circleci/ && chmod +x api.sh
+    expect .circleci/amplify_init.exp ../aws-amplify-cypress-api
+    expect .circleci/enable_api.exp
+    cd ../aws-amplify-cypress-api
+    yarn --frozen-lockfile --cache-folder ~/.cache/yarn
+    cd ../aws-amplify-cypress-api/src && cat $(find . -type f -name 'aws-exports*')
+
+    # Start API test server in background
+    cd ../aws-amplify-cypress-api
+    pwd
+    yarn start
+    
+    # Run cypress tests for API
+    cd ../aws-amplify-cypress-api
+    yarn add cypress@6.8.0 --save
+    cp ../repo/cypress.json .
+    cp -R ../repo/cypress .
+    yarn cypress run --spec $(find . -type f -name 'api_spec*')
+
+    cd .circleci/ && chmod +x delete_api.sh
+    expect .circleci/delete_api.exp
+
+    _scanE2eTestArtifacts
+
+    # storing in cache for auth tests
+    storeCache $HOME/aws-amplify-cypress-auth/cypress/videos ~/aws-amplify-cypress-auth/cypress/videos
+    storeCache $HOME/aws-amplify-cypress-auth/cypress/screenshots ~/aws-amplify-cypress-auth/cypress/screenshots
+
+    # storing in cache for api tests
+    storeCache $HOME/aws-amplify-cypress-api/cypress/videos ~aws-amplify-cypress-api/cypress/videos
+    storeCache $HOME/aws-amplify-cypress-api/cypress/screenshots ~aws-amplify-cypress-api/cypress/screenshots
+
     echo integration testing not implemented yet...
 }
-
 function _cleanupResources {
     #restore cache
     loadCache repo $CODEBUILD_SRC_DIR

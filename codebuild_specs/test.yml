@@ -11,5 +11,5 @@ phases:
       - source ./circleci
       - source ./shared-scripts.sh && _testLinux
   post_build:
-    commands: 
+    commands:
       - echo Finished unit testing
