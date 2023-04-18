@@ -91,8 +91,10 @@ function _setShell {
 function _buildLinux {
     _setShell
     echo Linux Build
+    
     yarn run production-build
     yarn build-tests
+
     storeCache $CODEBUILD_SRC_DIR repo
     storeCache $HOME/.cache .cache
 }
