@@ -121,8 +121,10 @@ function _testLinux {
     loadCache repo $CODEBUILD_SRC_DIR
     loadCache .cache $HOME/.cache
 
-    yarn test-ci
-        
+    node --expose-gc node_modules/.bin/jest --logHeapUsage
+    yarn test-ci-1
+    yarn test-ci-2
+
     # echo collecting coverage
     # yarn coverage
 }
