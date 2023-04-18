@@ -32,7 +32,7 @@ batch:
       debug-session: true
       depend-on:
         - build_linux
-    - identifier: validate_cdk_version
+    # - identifier: validate_cdk_version
     #   buildspec: codebuild_specs/validate_cdk_version.yml
     #   depend-on:
     #     - build_linux
@@ -59,12 +59,12 @@ batch:
     #   debug-session: true
     #   depend-on:
     #     - build_linux
-    # - identifier: cleanup_resources
-    #   buildspec: codebuild_specs/cleanup_resources.yml
-    #   env:
-    #     compute-type: BUILD_GENERAL1_LARGE
-    #   depend-on:
-    #     - build_linux
+    - identifier: cleanup_resources
+      buildspec: codebuild_specs/cleanup_resources.yml
+      env:
+        compute-type: BUILD_GENERAL1_LARGE
+      depend-on:
+        - build_linux
     # - identifier: build_pkg_binaries_arm
     #   buildspec: codebuild_specs/build_pkg_binaries_arm.yml
     #   env:
