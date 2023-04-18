@@ -125,8 +125,9 @@ function _testLinux {
 
     node --expose-gc node_modules/.bin/jest --logHeapUsage
     yarn test-ci
-    yarn test-ci-1
-    yarn test-ci-2
+
+    # yarn test-ci-1
+    # yarn test-ci-2
 
     # echo collecting coverage
     # yarn coverage

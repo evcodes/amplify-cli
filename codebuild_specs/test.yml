@@ -8,7 +8,6 @@ phases:
     commands:
       - codebuild-breakpoint
       - node -e "console.log(require('v8').getHeapStatistics().total_available_size / 1024 / 1024)"
-      - source .circleci/local_publish_helpers.sh
       - source ./shared-scripts.sh && _testLinux
   post_build:
     commands:
