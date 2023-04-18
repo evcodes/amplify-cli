@@ -43,7 +43,6 @@ batch:
         compute-type: BUILD_GENERAL1_LARGE
       depend-on:
         - build_linux
-
     - identifier: verify_api_extract
       buildspec: codebuild_specs/verify_api_extract.yml
       env:
@@ -52,6 +51,8 @@ batch:
         - build_linux
     - identifier: verify_yarn_lock
       buildspec: codebuild_specs/verify_yarn_lock.yml
+      env:
+        compute-type: BUILD_GENERAL1_LARGE
       depend-on:
         - build_linux
 
