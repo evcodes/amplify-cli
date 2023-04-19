@@ -377,6 +377,7 @@ function _integrationTests {
     echo $AUTH_CLONE_URL
     echo $API_CLONE_URL
     
+    source .circleci/
     # make file executable
     cd .circleci/ && chmod +x aws.sh
 
@@ -456,7 +457,7 @@ function _integrationTests {
     storeCache $HOME/aws-amplify-cypress-api/cypress/videos ~aws-amplify-cypress-api/cypress/videos
     storeCache $HOME/aws-amplify-cypress-api/cypress/screenshots ~aws-amplify-cypress-api/cypress/screenshots
 
-    echo integration testing not implemented yet...
+    echo integration tests completed
 }
 function _cleanupResources {
     #restore cache
