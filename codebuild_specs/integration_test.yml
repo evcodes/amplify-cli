@@ -4,4 +4,4 @@ env:
 phases:
   build:
     commands:
-      - source ./shared-scripts.sh && _integrationTests
+      - source ./circleci && ./shared-scripts.sh && _integrationTests
