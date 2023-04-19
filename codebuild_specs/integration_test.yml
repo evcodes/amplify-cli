@@ -1,9 +1,6 @@
 version: 0.2
 env:
   shell: bash
-  variables:
-    - AUTH_CLONE_URL: Ref to Secrets manager #TODO
-    - API_CLONE_URL: Ref to secrets manager #TODO
 phases:
   build:
     commands:
