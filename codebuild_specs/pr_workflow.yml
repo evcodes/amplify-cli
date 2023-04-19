@@ -31,7 +31,6 @@ batch:
       debug-session: true
       depend-on:
         - build_linux
-
     - identifier: test
       buildspec: codebuild_specs/test.yml
       env:
