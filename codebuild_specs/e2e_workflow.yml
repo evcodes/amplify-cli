@@ -86,6 +86,15 @@ batch:
         compute-type: BUILD_GENERAL1_LARGE
       depend-on:
         - publish_to_local_registry
+    - identifier: build_pkg_binaries_win
+      buildspec: codebuild_specs/build_pkg_binaries_win.yml
+      env:
+        type: WINDOWS_SERVER_2019_CONTAINER
+        compute-type: BUILD_GENERAL1_LARGE
+        image: aws/codebuild/windows-base:2019-2.0
+      depend-on:
+        - publish_to_local_registry
+
     - identifier: upload_pkg_binaries
       buildspec: codebuild_specs/upload_pkg_binaries.yml
       env:
@@ -95,6 +104,7 @@ batch:
         - build_pkg_binaries_linux
         - build_pkg_binaries_macos
         - build_pkg_binaries_win
+
     - identifier: verify_versions_match
       buildspec: codebuild_specs/verify_versions_match.yml
       depend-on:
