@@ -377,17 +377,6 @@ function _integrationTests {
     # make file executable
     cd .circleci/ && chmod +x aws.sh
 
-    #setting up dependencies
-    apt-get update
-    apt-get install -y sudo
-    sudo apt-get install -y tcl
-    sudo apt-get install -y expect
-    sudo apt-get install -y zip
-    sudo apt-get install -y lsof
-    sudo apt-get install -y python python-pip libpython-dev
-    sudo apt-get install -y jq
-    pip install awscli
-
     # don't know what this does
     expect .circleci/aws_configure.exp
 
