@@ -26,6 +26,7 @@ RUN set -ex \
       less \
       tree \
       nano \
+      libpython-dev \
     && apt-get install git=1:2.* -y -qq --no-install-recommends \
     && git version \
     && apt-get install -y -qq --no-install-recommends openssh-client \
