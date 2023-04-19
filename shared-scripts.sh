@@ -374,6 +374,9 @@ function _integrationTests {
     loadCache repo $CODEBUILD_SRC_DIR
     loadCache .cache $HOME/.cache
 
+    echo $AUTH_CLONE_URL
+    echo $API_CLONE_URL
+    
     # make file executable
     cd .circleci/ && chmod +x aws.sh
 
