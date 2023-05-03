@@ -90,11 +90,47 @@ export class AmplifyRootStack extends cdk.Stack implements AmplifyRootStackTempl
   }
 
   generateRootStackResources = async (): Promise<void> => {
+    const accessLogsBucket = new s3.Bucket(this, 'AccessLogsBucket', {
+      objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_ENFORCED,
+    });
     this.deploymentBucket = new s3.CfnBucket(this, 'DeploymentBucket', {
       bucketName: this._cfnParameterMap.get('DeploymentBucketName').valueAsString,
+      bucketEncryption: {
+        serverSideEncryptionConfiguration: [
+          {
+            bucketKeyEnabled: false,
+            serverSideEncryptionByDefault: {
+              sseAlgorithm: 'AES256',
+            },
+          },
+        ],
+      },
+      loggingConfiguration: {
+        destinationBucketName: accessLogsBucket.bucketName,
+        logFilePrefix: 'logs',
+      },
     });
 
     this.deploymentBucket.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
+
+    new s3.CfnBucketPolicy(this, 'DeploymentBucketBlockHTTP', {
+      bucket: this.deploymentBucket.bucketName,
+      policyDocument: {
+        Statement: [
+          {
+            Action: 's3:*',
+            Effect: 'Deny',
+            Principal: '*',
+            Resource: [`arn:aws:s3:::${this.deploymentBucket.bucketName}/*`, `arn:aws:s3:::${this.deploymentBucket.bucketName}`],
+            Condition: {
+              Bool: {
+                'aws:SecureTransport': false,
+              },
+            },
+          },
+        ],
+      },
+    });
 
     this.authRole = new iam.CfnRole(this, 'AuthRole', {
       roleName: this._cfnParameterMap.get('AuthRoleName').valueAsString,
