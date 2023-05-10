@@ -7,6 +7,16 @@ import { waitTillTableStateIsActive } from '../../../utils/dynamo-db/helpers';
 jest.mock('../../../utils/dynamo-db/helpers');
 
 describe('DynamoDB Utils', () => {
+  const isTest = process.env.JEST_WORKER_ID;
+  const config = {
+    convertEmptyValues: true,
+    ...(isTest && {
+      endpoint: 'localhost:8000',
+      sslEnabled: false,
+      region: 'local-env',
+    }),
+  };
+
   beforeEach(() => {
     jest.resetAllMocks();
     AWSMock.setSDKInstance(AWS);
@@ -72,7 +82,7 @@ describe('DynamoDB Utils', () => {
         const tableName = params.TableName;
         cb(null, describeTableResult[tableName]);
       });
-      const client = new AWS.DynamoDB();
+      const client = new AWS.DynamoDB(config);
       await expect(ddbUtils.describeTables(client, tableNames)).resolves.toEqual({
         table1: describeTableResult.table1.Table,
         table2: describeTableResult.table2.Table,
@@ -134,7 +144,7 @@ describe('DynamoDB Utils', () => {
           ],
         },
       ];
-      const client = new AWS.DynamoDB();
+      const client = new AWS.DynamoDB(config);
       await ddbUtils.createTables(client, tableInputs);
       expect(createTableMock).toHaveBeenCalledTimes(2);
       expect(createTableMock.mock.calls[0][0]).toEqual(tableInputs[0]);
@@ -218,7 +228,7 @@ describe('DynamoDB Utils', () => {
           ],
         },
       ];
-      const client = new AWS.DynamoDB();
+      const client = new AWS.DynamoDB(config);
       const updatePromise = ddbUtils.updateTables(client, tables);
       await updatePromise;
 
