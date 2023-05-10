@@ -1,15 +1,24 @@
 import { waitTillTableStateIsActive } from '../../../utils/dynamo-db/helpers';
 import * as AWSMock from 'aws-sdk-mock';
 import * as AWS from 'aws-sdk';
-import { DynamoDB } from 'aws-sdk';
 
 describe('aitTillTableStateIsActive', () => {
   const describeTableMock = jest.fn();
+
+  const isTest = process.env.JEST_WORKER_ID;
+  const config = {
+    convertEmptyValues: true,
+    ...(isTest && {
+      endpoint: 'localhost:8000',
+      sslEnabled: false,
+      region: 'local-env',
+    }),
+  };
+
   beforeEach(() => {
     jest.resetAllMocks();
     jest.useFakeTimers();
     AWSMock.setSDKInstance(AWS);
-    AWSMock.mock('DynamoDB', 'describeTable', describeTableMock);
   });
   afterEach(() => {
     jest.useRealTimers();
@@ -24,9 +33,9 @@ describe('aitTillTableStateIsActive', () => {
         },
       });
     });
-    const dynamoDBClient = new DynamoDB();
+    const dynamoDbClient = new AWS.DynamoDB(config);
 
-    const waitTillTableStateIsActivePromise = waitTillTableStateIsActive(dynamoDBClient, 'table1');
+    const waitTillTableStateIsActivePromise = waitTillTableStateIsActive(dynamoDbClient, 'table1');
     jest.advanceTimersByTime(1000);
     await waitTillTableStateIsActivePromise;
     expect(describeTableMock.mock.calls[0][0]).toEqual({ TableName: 'table1' });
@@ -41,7 +50,7 @@ describe('aitTillTableStateIsActive', () => {
         },
       });
     });
-    const dynamoDBClient = new DynamoDB();
+    const dynamoDBClient = new AWS.DynamoDB(config);
 
     const waitTillTableStateIsActivePromise = waitTillTableStateIsActive(dynamoDBClient, 'table1');
     jest.runOnlyPendingTimers();
@@ -60,7 +69,7 @@ describe('aitTillTableStateIsActive', () => {
         },
       });
     });
-    const dynamoDBClient = new DynamoDB();
+    const dynamoDBClient = new AWS.DynamoDB(config);
 
     const waitTillTableStateIsActivePromise = waitTillTableStateIsActive(dynamoDBClient, 'table1');
     jest.advanceTimersByTime(3000);

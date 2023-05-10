@@ -14,7 +14,7 @@ loadConfigurationForEnv_mock.mockResolvedValue({
   accessKeyId: 'testaccesskey',
   secretAccessKey: 'testsecretaccesskey',
   sessionToken: 'testsessiontoken',
-  region: 'test-region',
+  region: 'us-test-1',
 });
 
 const stateManager_mock = stateManager as jest.Mocked<typeof stateManager>;
@@ -25,7 +25,7 @@ pathManager_mock.getBackendDirPath.mockReturnValue('backend/path');
 
 const dotenv_mock = dotenv as jest.Mocked<typeof dotenv>;
 
-describe('populate labmda mock env vars', () => {
+describe('populate lambda mock env vars', () => {
   beforeEach(() => jest.clearAllMocks());
   it('populates AWS credential variables', async () => {
     const processedLambda: ProcessedLambdaFunction = {
@@ -53,7 +53,7 @@ describe('populate labmda mock env vars', () => {
     stateManager_mock.getTeamProviderInfo.mockReturnValueOnce({
       test: {
         awscloudformation: {
-          Region: 'test-region',
+          Region: 'us-test-1',
         },
       },
     });
@@ -62,7 +62,7 @@ describe('populate labmda mock env vars', () => {
     await populateLambdaMockEnvVars({} as $TSContext, processedLambda);
     expect(processedLambda.environment).toMatchObject({
       _HANDLER: processedLambda.handler,
-      AWS_REGION: 'test-region',
+      AWS_REGION: 'us-test-1',
       AWS_LAMBDA_FUNCTION_NAME: processedLambda.name,
       LAMBDA_TASK_ROOT: expectedPath,
       LAMBDA_RUNTIME_DIR: expectedPath,

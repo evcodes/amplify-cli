@@ -28,7 +28,6 @@
     "watch": "tsc -w",
     "clean": "rimraf lib tsconfig.tsbuildinfo node_modules",
     "velocity": "jest ./src/__tests__/velocity/*.test.ts",
-    "jest": "jest",
     "extract-api": "ts-node ../../scripts/extract-api.ts"
   },
   "dependencies": {
