@@ -3,22 +3,14 @@ import * as AWSMock from 'aws-sdk-mock';
 import * as AWS from 'aws-sdk';
 import { DescribeTableOutput, CreateTableInput, UpdateTableInput, UpdateTableOutput, TableDescription } from 'aws-sdk/clients/dynamodb';
 import { waitTillTableStateIsActive } from '../../../utils/dynamo-db/helpers';
+import { DynamoDB } from 'aws-sdk';
 
 jest.mock('../../../utils/dynamo-db/helpers');
 
 describe('DynamoDB Utils', () => {
-  const isTest = process.env.JEST_WORKER_ID;
-  const config = {
-    convertEmptyValues: true,
-    ...(isTest && {
-      endpoint: 'localhost:8000',
-      sslEnabled: false,
-      region: 'local-env',
-    }),
-  };
   beforeEach(() => {
     jest.resetAllMocks();
-    AWSMock.setSDKInstance(AWS);
+    AWSMock.setSDKInstance(require('aws-sdk'));
   });
 
   describe('describeTables', () => {
@@ -29,7 +21,7 @@ describe('DynamoDB Utils', () => {
 
     it('should call DynamoDB Clients describe table and collect the results', async () => {
       const tableNames = ['table1', 'table2'];
-      const describeTableResult: Record<string, DescribeTableOutput> = {
+      const describeTableResult = {
         table1: {
           Table: {
             TableName: 'table1',
@@ -77,11 +69,11 @@ describe('DynamoDB Utils', () => {
           },
         },
       };
-      describeTableMock.mockImplementation((params, cb) => {
+      describeTableMock.mockImplementation(function (params, cb) {
         const tableName = params.TableName;
         cb(null, describeTableResult[tableName]);
       });
-      const client = new AWS.DynamoDB(config);
+      const client = new AWS.DynamoDB();
       await expect(ddbUtils.describeTables(client, tableNames)).resolves.toEqual({
         table1: describeTableResult.table1.Table,
         table2: describeTableResult.table2.Table,
@@ -93,25 +85,19 @@ describe('DynamoDB Utils', () => {
 
     it('should early exit for empty tables', async () => {
       const tableNames = [];
-      const client = new AWS.DynamoDB(config);
-      await expect(ddbUtils.describeTables(client, tableNames)).resolves.toEqual({});
+      const client = {
+        describeTable: describeTableMock,
+      };
+      await expect(ddbUtils.describeTables(client as unknown as DynamoDB, tableNames)).resolves.toEqual({});
       expect(describeTableMock).toHaveBeenCalledTimes(0);
     });
   });
 
   describe('createTables', () => {
     const createTableMock = jest.fn();
-    beforeEach(() => {
-      AWSMock.mock('DynamoDB', 'createTable', createTableMock);
-    });
 
     it('should call createTable for each table', async () => {
-      createTableMock.mockImplementation((params, cb) => {
-        const tableName = params.TableName;
-        cb(null, null);
-      });
-
-      const tableInputs: CreateTableInput[] = [
+      const tableInputs = [
         {
           TableName: 'table1',
           AttributeDefinitions: [
@@ -143,8 +129,16 @@ describe('DynamoDB Utils', () => {
           ],
         },
       ];
-      const client = new AWS.DynamoDB(config);
-      await ddbUtils.createTables(client, tableInputs);
+      createTableMock.mockImplementation(() => {
+        return {
+          promise: jest.fn().mockResolvedValue(null),
+        };
+      });
+
+      const client = {
+        createTable: createTableMock,
+      };
+      await ddbUtils.createTables(client as unknown as DynamoDB, tableInputs);
       expect(createTableMock).toHaveBeenCalledTimes(2);
       expect(createTableMock.mock.calls[0][0]).toEqual(tableInputs[0]);
       expect(createTableMock.mock.calls[1][0]).toEqual(tableInputs[1]);
@@ -153,24 +147,10 @@ describe('DynamoDB Utils', () => {
 
   describe('updateTables', () => {
     const updateTableMock = jest.fn();
-    const describeTableMock = jest.fn();
-    beforeEach(() => {
-      AWSMock.mock('DynamoDB', 'updateTable', updateTableMock);
-      AWSMock.mock('DynamoDB', 'describeTable', describeTableMock);
-    });
 
     it('should wait for table to be in ACTIVE state before updating', async () => {
       const waitTillTableStateIsActiveMock = (waitTillTableStateIsActive as jest.Mock).mockResolvedValue(undefined);
-      updateTableMock.mockImplementation(({ TableName, AttributeDefinitions, GlobalSecondaryIndexUpdates }: UpdateTableInput, cb) => {
-        const response: UpdateTableOutput = {
-          TableDescription: {
-            TableName,
-            AttributeDefinitions,
-            GlobalSecondaryIndexes: GlobalSecondaryIndexUpdates.filter((update) => update.Create).map((gsi) => gsi.Update),
-          },
-        };
-        cb(null, response);
-      });
+
       const tables: UpdateTableInput[] = [
         {
           TableName: 'table1',
@@ -227,8 +207,29 @@ describe('DynamoDB Utils', () => {
           ],
         },
       ];
-      const client = new AWS.DynamoDB(config);
-      const updatePromise = ddbUtils.updateTables(client, tables);
+
+      updateTableMock.mockImplementation((params, callback) => {
+        const { TableName, AttributeDefinitions, GlobalSecondaryIndexUpdates } = params;
+        const response = {
+          TableDescription: {
+            TableName,
+            AttributeDefinitions,
+            GlobalSecondaryIndexes: GlobalSecondaryIndexUpdates.filter((update) => update.Create).map((gsi) => gsi.Update),
+          },
+        };
+        if (typeof callback === 'function') {
+          callback(null, response);
+        } else {
+          return {
+            promise: jest.fn().mockResolvedValue(response),
+          };
+        }
+      });
+
+      const client = {
+        updateTable: updateTableMock,
+      };
+      const updatePromise = ddbUtils.updateTables(client as unknown as DynamoDB, tables);
       await updatePromise;
 
       expect(updateTableMock).toHaveBeenCalledTimes(2);
