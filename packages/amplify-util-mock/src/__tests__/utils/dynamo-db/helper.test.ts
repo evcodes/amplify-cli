@@ -9,14 +9,15 @@ describe('aitTillTableStateIsActive', () => {
     jest.resetAllMocks();
     jest.useFakeTimers();
     AWSMock.setSDKInstance(AWS);
-    AWSMock.mock('DynamoDB', 'describeTable', describeTableMock);
   });
+
   afterEach(() => {
     jest.useRealTimers();
   });
 
-  it('should wait for table to be in active state', async () => {
-    describeTableMock.mockImplementation(({ TableName }, cb) => {
+  it.only('should wait for table to be in active state', async () => {
+    
+    describeTableMock.mockImplementation({TableName}, cb) => {
       cb(null, {
         Table: {
           TableName,
@@ -24,9 +25,12 @@ describe('aitTillTableStateIsActive', () => {
         },
       });
     });
-    const dynamoDBClient = new DynamoDB();
 
-    const waitTillTableStateIsActivePromise = waitTillTableStateIsActive(dynamoDBClient, 'table1');
+    const dynamoDBClient = {
+      describeTable: describeTableMock,
+    };
+
+    const waitTillTableStateIsActivePromise = waitTillTableStateIsActive(dynamoDBClient as unknown as DynamoDB, 'table1');
     jest.advanceTimersByTime(1000);
     await waitTillTableStateIsActivePromise;
     expect(describeTableMock.mock.calls[0][0]).toEqual({ TableName: 'table1' });
@@ -42,9 +46,10 @@ describe('aitTillTableStateIsActive', () => {
       });
     });
     const dynamoDBClient = new DynamoDB();
-
+    jest.spyOn(global, 'setInterval');
+    jest.spyOn(global, 'setTimeout');
     const waitTillTableStateIsActivePromise = waitTillTableStateIsActive(dynamoDBClient, 'table1');
-    jest.runOnlyPendingTimers();
+    jest.advanceTimersByTime(2000);
     await expect(waitTillTableStateIsActivePromise).rejects.toMatchObject({ message: 'Waiting for table status to turn ACTIVE timed out' });
     expect(describeTableMock).toHaveBeenCalled();
   });
@@ -61,7 +66,6 @@ describe('aitTillTableStateIsActive', () => {
       });
     });
     const dynamoDBClient = new DynamoDB();
-
     const waitTillTableStateIsActivePromise = waitTillTableStateIsActive(dynamoDBClient, 'table1');
     jest.advanceTimersByTime(3000);
     await waitTillTableStateIsActivePromise;

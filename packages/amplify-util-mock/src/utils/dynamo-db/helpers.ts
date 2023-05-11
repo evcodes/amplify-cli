@@ -19,7 +19,11 @@ export async function waitTillTableStateIsActive(
         resolve();
       }
     };
-    intervalHandle = setInterval(void checkStatus, 1000);
+    intervalHandle = setInterval(() => {
+      void (async () => {
+        await checkStatus();
+      })();
+    }, 1000);
     timeoutHandle = setTimeout(() => {
       clearTimeout(timeoutHandle);
       clearInterval(intervalHandle);
