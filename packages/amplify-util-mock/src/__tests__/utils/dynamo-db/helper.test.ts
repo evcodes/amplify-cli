@@ -57,7 +57,7 @@ describe('waitTillTableStateIsActive', () => {
     let callCount = 0;
 
     describeTableMock.mockImplementation(({ TableName }) => {
-      callCount+=1;
+      callCount += 1;
       return {
         promise: jest.fn().mockResolvedValue({
           Table: {

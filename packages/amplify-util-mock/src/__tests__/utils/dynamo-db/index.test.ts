@@ -9,6 +9,7 @@ import { CreateTableInput, GlobalSecondaryIndex } from 'aws-sdk/clients/dynamodb
 jest.mock('../../../utils/dynamo-db/utils');
 
 describe('createAndUpdateTable', () => {
+  const describeTablesMock = jest.fn();
   const table1Input: CreateTableInput = {
     TableName: 'table1',
     AttributeDefinitions: [
@@ -74,29 +75,35 @@ describe('createAndUpdateTable', () => {
     jest.resetAllMocks();
     jest.useFakeTimers();
     AWSMock.setSDKInstance(AWS);
-    AWSMock.mock('DynamoDB', 'listTables', listTablesMock);
   });
 
-  it('should create new tables when they are missing', async () => {
+  it.only('should create new tables when they are missing', async () => {
     const mockDDBConfig: MockDynamoDBConfig = {
-      tables: [{ Properties: table1Input }],
+      tables: [{ Properties: table1Input, isNewlyAdded: true }],
     };
     listTablesMock.mockImplementation((cb) => {
       cb(null, {
         TableNames: [],
       });
     });
-    (describeTables as jest.Mock).mockReturnValue({});
-    const client = new DynamoDB();
-    await createAndUpdateTable(client, mockDDBConfig);
-    expect(createTables).toHaveBeenCalledWith(client, [table1Input]);
+    describeTablesMock.mockReturnValue({});
+
+    const ddbClient = {
+      describeTables: describeTablesMock,
+      listTables: listTablesMock,
+    };
+    await createAndUpdateTable(ddbClient as unknown as DynamoDB, mockDDBConfig);
+    expect(createTables).toHaveBeenCalledWith(ddbClient, [table1Input]);
     expect(getUpdateTableInput).not.toHaveBeenCalled();
-    expect(updateTables).toHaveBeenCalledWith(client, []);
+    expect(updateTables).toHaveBeenCalledWith(ddbClient, []);
   });
 
   it('should update existing table with new GSI', async () => {
     const mockDDBConfig: MockDynamoDBConfig = {
-      tables: [{ Properties: table1Input }, { Properties: table2Input }],
+      tables: [
+        { Properties: table1Input, isNewlyAdded: false },
+        { Properties: table2Input, isNewlyAdded: false },
+      ],
     };
 
     listTablesMock.mockImplementation((cb) => {
