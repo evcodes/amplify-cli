@@ -23,7 +23,7 @@ export async function updateTables(dynamoDbClient: DynamoDB, tables: UpdateTable
   }
 }
 
-export async function describeTables(dynamoDbClient: DynamoDB, tableNames: string[]): Promise<Record<string, TableDescription>> {  
+export async function describeTables(dynamoDbClient: DynamoDB, tableNames: string[]): Promise<Record<string, TableDescription>> {
   const tableDetails: Record<string, TableDescription> = {};
   if (_.isEmpty(tableNames)) {
     return tableDetails;

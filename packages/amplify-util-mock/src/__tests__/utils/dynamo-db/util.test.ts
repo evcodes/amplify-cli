@@ -21,7 +21,7 @@ describe('DynamoDB Utils', () => {
 
     it('should call DynamoDB Clients describe table and collect the results', async () => {
       const tableNames = ['table1', 'table2'];
-      const describeTableResult = {
+      const describeTableResult: Record<string, DescribeTableOutput> = {
         table1: {
           Table: {
             TableName: 'table1',
