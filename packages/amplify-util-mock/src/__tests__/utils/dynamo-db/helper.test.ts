@@ -72,7 +72,7 @@ describe('waitTillTableStateIsActive', () => {
       describeTable: describeTableMock,
     };
     const waitTillTableStateIsActivePromise = waitTillTableStateIsActive(dynamoDBClient as unknown as DynamoDB, 'table1');
-    jest.advanceTimersByTime(3000);
+    jest.advanceTimersByTime(4000);
     await waitTillTableStateIsActivePromise;
     expect(describeTableMock).toBeCalledTimes(4);
     expect(describeTableMock.mock.calls[0][0]).toEqual({ TableName: 'table1' });
